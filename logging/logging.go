@@ -1,9 +1,7 @@
 package logging
 
 import (
-	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -22,10 +20,6 @@ func NewLoggerConfig() (c *LoggerConfig) {
 }
 
 func NewLogger(c *LoggerConfig) (logger *Logger) {
-	logger = &Logger{
-		c
-
-	}
 	return
 }
 
@@ -59,19 +53,14 @@ func (logger *Logger) Warning(s string) {
 	logger.logToConsole(logString)
 }
 
-func (logger *Logger) Error(s string, err error) {
-	logString := createLogString(Error, s, err)
+func (logger *Logger) Error(s string) {
+	logString := createLogString(Error, s)
 	logger.logToConsole(logString)
 }
 
-func (logger *Logger) createLogString(level LogLevel, s string) string {
-	logTime = time.Now()
+func createLogString(level LogLevel, s string) string {
+	logTime := time.Now()
 	return fmt.Sprintf("%s | %s | %s", logTime, level, s)
-}
-
-func (logger *Logger) createLogString(level LogLevel, s string, err error) string {
-	logTime = time.Now()
-	return fmt.Sprintf("%s | %s | %s | %s", logTime, level, s, err.Error())
 }
 
 func (logger *Logger) logToConsole(logString string) {

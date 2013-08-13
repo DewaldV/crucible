@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/DewaldV/chain-of-thought/services/xanatos/crucible/logging"
+	"github.com/DewaldV/crucible/logging"
 	"io/ioutil"
 	"os"
 )
@@ -31,8 +31,7 @@ type ServiceConfigStruct struct {
 }
 
 type LoggerConfig struct {
-	Level    LogLevel
-	Type     LoggerType
+	Level    logging.LogLevel
 	FileName string
 }
 
@@ -83,11 +82,10 @@ func newSiteConfigStruct() (s *ServiceConfigStruct) {
 	return
 }
 
-func newLoggerConfig() (c *LoggerConfig) {
-	c = new(LoggerConfig)
+func newLoggerConfig() (c *logging.LoggerConfig) {
+	c = new(logging.LoggerConfig)
 	c.FileName = "log"
-	c.Type = File
-	c.Level = Info
+	c.Level = logging.Info
 	return
 }
 
