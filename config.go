@@ -4,24 +4,23 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/DewaldV/crucible/database"
 	"github.com/DewaldV/crucible/logging"
 	"io/ioutil"
 	"os"
 )
+
+type ConfigPrinter interface {
+	PrintConfig() string
+}
 
 type CoreConfigStruct struct {
 	HttpPort      int
 	HttpsPort     int
 	WorkerThreads int
 	RootContext   string
-	DataSources   map[string]*DataSourceConfigStruct
+	DataSources   map[string]*database.DataSourceConfigStruct
 	Services      map[string]*ServiceConfigStruct
-}
-
-type DataSourceConfigStruct struct {
-	ServerName   string
-	ServerPort   int
-	DatabaseName string
 }
 
 type ServiceConfigStruct struct {
@@ -58,9 +57,9 @@ func LoadConfig(path string) error {
 	}
 
 	fmt.Println("Loaded configuration:")
-	fmt.Println(Conf.printConfig())
+	fmt.Println(Conf.PrintConfig())
 
-	LoadSessions(Conf.DataSources)
+	database.LoadSessions(Conf.DataSources)
 
 	return nil
 }
@@ -89,30 +88,23 @@ func newLoggerConfig() (c *logging.LoggerConfig) {
 	return
 }
 
-func (c *CoreConfigStruct) printConfig() (s string) {
+func (c *CoreConfigStruct) PrintConfig() (s string) {
 	s = fmt.Sprintf("HttpPort: %d\n", c.HttpPort)
 	s += fmt.Sprintf("HttpsPort: %d\n", c.HttpsPort)
 	s += fmt.Sprintf("RootContext: %s\n", c.RootContext)
 	s += fmt.Sprintf("WorkerThreads: %d\n", c.WorkerThreads)
 	for key, value := range c.DataSources {
 		s += fmt.Sprintf("DataSourceName: %s\n", key)
-		s += value.printConfig()
+		s += value.PrintConfig()
 	}
 	for key, value := range c.Services {
 		s += fmt.Sprintf("ServiceName: %s\n", key)
-		s += value.printConfig()
+		s += value.PrintConfig()
 	}
 	return
 }
 
-func (d *DataSourceConfigStruct) printConfig() (s string) {
-	s = fmt.Sprintf("\t> ServerName: %s\n", d.ServerName)
-	s += fmt.Sprintf("\t> ServerPort: %d\n", d.ServerPort)
-	s += fmt.Sprintf("\t> DatabaseName: %s\n", d.DatabaseName)
-	return
-}
-
-func (c *ServiceConfigStruct) printConfig() (s string) {
+func (c *ServiceConfigStruct) PrintConfig() (s string) {
 	s = fmt.Sprintf("\t> Location: %s\n", c.Location)
 	var allowedMethods string
 	for key := range c.AllowedMethods {
