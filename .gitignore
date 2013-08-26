@@ -21,4 +21,5 @@ _testmain.go
 
 *.exe
 
+#Mac Stuff
 .DS_Store

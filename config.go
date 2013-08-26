@@ -10,6 +10,21 @@ import (
 	"os"
 )
 
+func init() {
+	LoadDefaultConfig()
+}
+
+var DefaultConfigPaths = [...]string{
+	"/etc/crucible/",
+	"/usr/local/etc/crucible/",
+	"~/",
+	"~/Dev/",
+	"./"}
+
+const (
+	DefaultConfigFileName = "crucible.conf"
+)
+
 type ConfigPrinter interface {
 	PrintConfig() string
 }
@@ -19,6 +34,7 @@ type CoreConfigStruct struct {
 	HttpsPort     int
 	WorkerThreads int
 	RootContext   string
+	CoreLogger    *LoggerConfig
 	DataSources   map[string]*database.DataSourceConfigStruct
 	Services      map[string]*ServiceConfigStruct
 }
@@ -35,6 +51,19 @@ type LoggerConfig struct {
 }
 
 var Conf *CoreConfigStruct
+
+func LoadDefaultConfig() error {
+	var configPath string
+	for _, path := range DefaultConfigPaths {
+		configPath = fmt.Sprintf("%s%s", path, DefaultConfigFileName)
+		_, err := os.Open(configPath)
+		if err == nil {
+			return LoadConfig(configPath)
+		}
+	}
+
+	return &ConfigError{"", "No default config file could be found", ""}
+}
 
 func LoadConfig(path string) error {
 	configFile, err := os.Open(path)
@@ -56,7 +85,7 @@ func LoadConfig(path string) error {
 		return &ConfigError{path, "Error parsing config file", err.Error()}
 	}
 
-	fmt.Println("Loaded configuration:")
+	fmt.Println("Loaded configuration:", path)
 	fmt.Println(Conf.PrintConfig())
 
 	database.LoadSessions(Conf.DataSources)
