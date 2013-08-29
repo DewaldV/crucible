@@ -1,41 +1,57 @@
 package crucible
 
 import (
-	"code.google.com/p/gorest"
-	"fmt"
 	"net/http"
+	"strings"
 )
 
-func AddOptionsCors(rb *gorest.ResponseBuilder, request *http.Request, sc *ServiceConfigStruct) error {
-	AddAllowOriginsCors(rb, request, sc.AllowedOrigins)
-	AddAllowMethodCors(rb, request, sc.AllowedMethods)
-	AddAllowHeaderCors(rb)
+func CorsFilter() *corsFilter {
+	return corsFilterHandler
+}
+
+var corsFilterHandler *corsFilter = &corsFilter{}
+
+type corsFilter struct {
+}
+
+func (f *corsFilter) DoFilter(writer http.ResponseWriter, request *http.Request, filterChain chan Filter) {
+	sc := Conf.Services[request.RequestURI]
+
+	if request.Method == "OPTIONS" {
+		f.addOptionsCors(writer, request, sc)
+	} else {
+		f.addAllowOriginsCors(writer, request, sc.AllowedOrigins)
+	}
+}
+
+func (f *corsFilter) addOptionsCors(writer http.ResponseWriter, request *http.Request, sc *ServiceConfigStruct) error {
+	f.addAllowOriginsCors(writer, request, sc.AllowedOrigins)
+	f.addAllowMethodCors(writer, request, sc.AllowedMethods)
+	f.addAllowHeaderCors(writer)
 	return nil
 }
 
-func AddAllowOriginsCors(rb *gorest.ResponseBuilder, request *http.Request, allowedOrigins map[string]bool) error {
-	origin := request.Header.Get("origin")
+func (f *corsFilter) addAllowOriginsCors(writer http.ResponseWriter, request *http.Request, allowedOrigins map[string]bool) error {
+	origin := strings.ToLower(request.Header.Get("origin"))
 	originAllowed := allowedOrigins[origin]
 
 	if originAllowed {
-		rb.AddHeader("Access-Control-Allow-Origin", origin)
+		writer.Header().Add("Access-Control-Allow-Origin", origin)
 	}
 
 	return nil
 }
 
-func AddAllowMethodCors(rb *gorest.ResponseBuilder, request *http.Request, allowedMethods map[string]bool) error {
-	//method := request.Header.Get("access-control-allow-method")
-	var allowedMethodsStr string
-	for key := range allowedMethods {
-		allowedMethodsStr += fmt.Sprintf("%s,", key)
-	}
-	allowedMethodsStr = allowedMethodsStr[:len(allowedMethodsStr)-1]
+func (f *corsFilter) addAllowMethodCors(writer http.ResponseWriter, request *http.Request, allowedMethods map[string]bool) error {
+	method := strings.ToUpper(request.Header.Get("access-control-allow-method"))
+	methodAllowed := allowedMethods[method]
 
-	rb.AddHeader("Access-Control-Allow-Method", allowedMethodsStr)
+	if methodAllowed {
+		writer.Header().Add("Access-Control-Allow-Method", method)
+	}
 	return nil
 }
 
-func AddAllowHeaderCors(rb *gorest.ResponseBuilder) {
-	rb.AddHeader("Access-Control-Allow-Headers", "accept, origin, x-requested-with, content-type")
+func (f *corsFilter) addAllowHeaderCors(writer http.ResponseWriter) {
+	writer.Header().Add("Access-Control-Allow-Headers", "accept, origin, x-requested-with, content-type")
 }
