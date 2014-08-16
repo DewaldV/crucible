@@ -1,8 +1,10 @@
-package crucible
+package cors
 
 import (
 	"net/http"
 	"strings"
+	"github.com/DewaldV/crucible/config"
+	"github.com/DewaldV/crucible/filters"
 )
 
 func CorsFilter() *corsFilter {
@@ -14,8 +16,8 @@ var corsFilterHandler *corsFilter = &corsFilter{}
 type corsFilter struct {
 }
 
-func (f *corsFilter) DoFilter(writer http.ResponseWriter, request *http.Request, filterChain chan Filter) {
-	sc := Conf.Services[request.RequestURI]
+func (f *corsFilter) DoFilter(writer http.ResponseWriter, request *http.Request, filterChain chan filters.Filter) {
+	sc := config.Conf.Services[request.RequestURI]
 
 	if request.Method == "OPTIONS" {
 		f.addOptionsCors(writer, request, sc)
@@ -24,7 +26,7 @@ func (f *corsFilter) DoFilter(writer http.ResponseWriter, request *http.Request,
 	}
 }
 
-func (f *corsFilter) addOptionsCors(writer http.ResponseWriter, request *http.Request, sc *ServiceConfigStruct) error {
+func (f *corsFilter) addOptionsCors(writer http.ResponseWriter, request *http.Request, sc *config.ServiceConfiguration) error {
 	f.addAllowOriginsCors(writer, request, sc.AllowedOrigins)
 	f.addAllowMethodCors(writer, request, sc.AllowedMethods)
 	f.addAllowHeaderCors(writer)

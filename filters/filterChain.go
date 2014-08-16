@@ -1,4 +1,4 @@
-package crucible
+package filters
 
 import (
 	"net/http"
