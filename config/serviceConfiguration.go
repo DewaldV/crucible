@@ -8,7 +8,7 @@ type ServiceConfiguration struct {
   AllowedMethods map[string]bool
 }
 
-func (c *ServiceConfiguration) PrintConfig() (s string) {
+func (c *ServiceConfiguration) String() (s string) {
   s = fmt.Sprintf("\t> Location: %s\n", c.Location)
   var allowedMethods string
   for key := range c.AllowedMethods {
@@ -29,5 +29,7 @@ func newServiceConfiguration() (s *ServiceConfiguration) {
   s.Location = "/"
   s.AllowedOrigins = make(map[string]bool)
   s.AllowedOrigins["localhost"] = true
+  s.AllowedMethods = make(map[string]bool)
+  s.AllowedMethods["GET"] = true
   return
 }

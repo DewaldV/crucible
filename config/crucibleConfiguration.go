@@ -2,7 +2,6 @@ package config
 
 import (
   "fmt"
-  "github.com/DewaldV/crucible/database"
 )
 
 type CrucibleConfiguration struct {
@@ -11,22 +10,22 @@ type CrucibleConfiguration struct {
   WorkerThreads int
   RootContext   string
   CoreLogger    *LoggerConfig
-  DataSources   map[string]*database.DataSourceConfigStruct
+  DataSources   map[string]*DataSourceConfiguration
   Services      map[string]*ServiceConfiguration
 }
 
-func (c *CrucibleConfiguration) PrintConfig() (s string) {
+func (c *CrucibleConfiguration) String() (s string) {
   s = fmt.Sprintf("HttpPort: %d\n", c.HttpPort)
   s += fmt.Sprintf("HttpsPort: %d\n", c.HttpsPort)
   s += fmt.Sprintf("RootContext: %s\n", c.RootContext)
   s += fmt.Sprintf("WorkerThreads: %d\n", c.WorkerThreads)
   for key, value := range c.DataSources {
     s += fmt.Sprintf("DataSourceName: %s\n", key)
-    s += value.PrintConfig()
+    s += value.String()
   }
   for key, value := range c.Services {
     s += fmt.Sprintf("ServiceName: %s\n", key)
-    s += value.PrintConfig()
+    s += value.String()
   }
   return
 }

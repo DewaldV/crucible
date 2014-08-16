@@ -1,23 +1,10 @@
 package database
 
 import (
-	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"github.com/DewaldV/crucible/config"
 )
-
-type DataSourceConfigStruct struct {
-	ServerName   string
-	ServerPort   int
-	DatabaseName string
-}
-
-func (d *DataSourceConfigStruct) PrintConfig() (s string) {
-	s = fmt.Sprintf("\t> ServerName: %s\n", d.ServerName)
-	s += fmt.Sprintf("\t> ServerPort: %d\n", d.ServerPort)
-	s += fmt.Sprintf("\t> DatabaseName: %s\n", d.DatabaseName)
-	return
-}
 
 type MgoConnection struct {
 	Database   string
@@ -72,7 +59,7 @@ func ExecuteWithCollection(database, collection string, f func(*mgo.Collection) 
 
 var sessionPool map[string]*mgo.Session
 
-func LoadSessions(dataSourceConfig map[string]*DataSourceConfigStruct) {
+func LoadSessions(dataSourceConfig map[string]*config.DataSourceConfiguration) {
 	sessionPool = make(map[string]*mgo.Session)
 	for key, source := range dataSourceConfig {
 		s, _ := mgo.Dial(source.ServerName)

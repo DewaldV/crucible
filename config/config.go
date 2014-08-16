@@ -23,10 +23,6 @@ const (
 	DefaultConfigFileName = "crucible.conf"
 )
 
-type ConfigPrinter interface {
-	PrintConfig() string
-}
-
 var Conf *CrucibleConfiguration
 
 func LoadDefaultConfig() error {
@@ -63,7 +59,7 @@ func LoadConfig(path string) error {
 	}
 
 	fmt.Println("Loaded configuration:", path)
-	fmt.Println(Conf.PrintConfig())
+	fmt.Println(Conf)
 
 	return nil
 }
